@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NEPSE Portfolio</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ── Login Screen ─────────────────────────────────────────────────────────── -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">NEPSE</div>
+    <p class="login-sub">Portfolio Tracker</p>
+    <input type="password" id="pwd-input" placeholder="Password"
+           autocomplete="current-password"
+           onkeydown="if(event.key==='Enter')tryLogin()">
+    <button onclick="tryLogin()" id="login-btn">Enter</button>
+    <div id="login-error" class="login-error hidden">Wrong password</div>
+  </div>
+</div>
+
+<!-- ── App ──────────────────────────────────────────────────────────────────── -->
+<div id="app" class="hidden">
+
+  <!-- Header -->
+  <header>
+    <span class="logo">NEPSE</span>
+    <nav class="desktop-nav">
+      <button class="active" onclick="showTab('portfolio',this,'mob-portfolio')">Portfolio</button>
+      <button onclick="showTab('history',this,'mob-history')">History</button>
+      <button onclick="showTab('analytics',this,'mob-analytics')">Analytics</button>
+      <button onclick="showTab('equilibrium',this,'mob-eq')">Equilibrium</button>
+    </nav>
+    <div class="header-right">
+      <span id="dirty-dot" class="dirty-dot hidden" title="Unsynced changes"></span>
+      <button class="btn sm" onclick="syncPortfolio()" id="sync-btn">Sync</button>
+      <button class="btn sm secondary" onclick="triggerUpdate()" id="update-btn">Update Data</button>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- Summary Cards -->
+    <div class="summary-cards">
+      <div class="card">
+        <div class="label">Invested</div>
+        <div class="value neu" id="s-invested">—</div>
+      </div>
+      <div class="card">
+        <div class="label">Current</div>
+        <div class="value neu" id="s-current">—</div>
+      </div>
+      <div class="card">
+        <div class="label">Unrealized P&amp;L</div>
+        <div class="value neu" id="s-pnl">—</div>
+      </div>
+      <div class="card">
+        <div class="label">Realized P&amp;L</div>
+        <div class="value neu" id="s-realized">—</div>
+      </div>
+      <div class="card">
+        <div class="label">Positions</div>
+        <div class="value neu" id="s-count">—</div>
+      </div>
+    </div>
+
+    <!-- ── Portfolio Tab ────────────────────────────────────────────────────── -->
+    <div id="tab-portfolio" class="tab-content active">
+      <div class="section-header">
+        <h2>Open Positions</h2>
+        <button class="btn" onclick="openAddModal()">+ Add</button>
+      </div>
+      <div class="table-wrap desktop-only">
+        <table>
+          <thead><tr>
+            <th>#</th><th>Symbol</th><th>Qty</th><th>Buy</th><th>LTP</th>
+            <th>P&amp;L</th><th>P&amp;L %</th><th>Date</th><th>Entry OHLC</th><th>Actions</th>
+          </tr></thead>
+          <tbody id="positions-body"></tbody>
+        </table>
+      </div>
+      <div id="positions-cards" class="mobile-only cards-list"></div>
+    </div>
+
+    <!-- ── History Tab ──────────────────────────────────────────────────────── -->
+    <div id="tab-history" class="tab-content">
+      <div class="section-header">
+        <h2>Closed Positions</h2>
+      </div>
+      <div class="table-wrap desktop-only">
+        <table>
+          <thead><tr>
+            <th>#</th><th>Symbol</th><th>Qty</th><th>Buy</th><th>Close</th>
+            <th>P&amp;L</th><th>P&amp;L %</th><th>Entry</th><th>Closed</th>
+            <th>Entry OHLC</th><th>Close OHLC</th><th></th>
+          </tr></thead>
+          <tbody id="history-body"></tbody>
+        </table>
+      </div>
+      <div id="history-cards" class="mobile-only cards-list"></div>
+    </div>
+
+    <!-- ── Analytics Tab ───────────────────────────────────────────────────── -->
+    <div id="tab-analytics" class="tab-content">
+      <div class="section-header">
+        <h2>Analytics</h2>
+        <div class="filter-group">
+          <button class="filter-btn active" onclick="setAnalyticsFilter('ALL',this)">All</button>
+          <button class="filter-btn" onclick="setAnalyticsFilter('1M',this)">1M</button>
+          <button class="filter-btn" onclick="setAnalyticsFilter('3M',this)">3M</button>
+          <button class="filter-btn" onclick="setAnalyticsFilter('6M',this)">6M</button>
+        </div>
+      </div>
+      <div id="an-stats" class="analytics-stats"></div>
+      <div class="analytics-charts">
+        <div class="chart-box">
+          <div class="chart-title">Unrealized P&amp;L by Symbol</div>
+          <div id="chart-unrealized" class="bar-chart"></div>
+        </div>
+        <div class="chart-box">
+          <div class="chart-title">Realized P&amp;L by Symbol</div>
+          <div id="chart-realized" class="bar-chart"></div>
+        </div>
+      </div>
+      <div id="an-tradelog"></div>
+    </div>
+
+    <!-- ── Equilibrium Tab ─────────────────────────────────────────────────── -->
+    <div id="tab-equilibrium" class="tab-content">
+      <div class="section-header">
+        <h2>Equilibrium Scanner</h2>
+        <button class="btn" onclick="loadEquilibrium()">Load Results</button>
+      </div>
+      <div id="eq-loading" class="loading-text hidden">Loading equilibrium data...</div>
+      <div id="eq-empty" class="muted-msg hidden">No equilibrium.json found. Run "Update Data" workflow first.</div>
+      <div class="table-wrap desktop-only" id="eq-table-wrap" style="display:none">
+        <table>
+          <thead><tr>
+            <th>Symbol</th><th>Date</th><th>Close</th><th>Points Below Eq.</th><th>Last Bought</th><th></th>
+          </tr></thead>
+          <tbody id="eq-body"></tbody>
+        </table>
+      </div>
+      <div id="eq-cards" class="mobile-only cards-list"></div>
+    </div>
+
+  </div><!-- .container -->
+
+  <!-- Bottom nav (mobile) -->
+  <nav class="bottom-nav">
+    <div class="bottom-nav-inner">
+      <button id="mob-portfolio" class="active" onclick="showTab('portfolio',this,'mob-portfolio')">
+        <span class="icon">&#128202;</span>Portfolio
+      </button>
+      <button id="mob-history" onclick="showTab('history',this,'mob-history')">
+        <span class="icon">&#128203;</span>History
+      </button>
+      <button id="mob-analytics" onclick="showTab('analytics',this,'mob-analytics')">
+        <span class="icon">&#128200;</span>Analytics
+      </button>
+      <button id="mob-eq" onclick="showTab('equilibrium',this,'mob-eq')">
+        <span class="icon">&#127919;</span>Scanner
+      </button>
+    </div>
+  </nav>
+
+</div><!-- #app -->
+
+<!-- ── Add / Edit Modal ─────────────────────────────────────────────────────── -->
+<div id="modal-add" class="overlay" onclick="overlayClick(event,'modal-add')">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modal-add-title">Add Position</h3>
+      <button class="close-btn" onclick="closeModal('modal-add')">&#10005;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <label>Symbol</label>
+        <input type="text" id="add-symbol" list="symbol-list"
+               placeholder="e.g. NABIL" autocomplete="off"
+               oninput="this.value=this.value.toUpperCase()"
+               onchange="previewOhlc('add')">
+        <datalist id="symbol-list"></datalist>
+      </div>
+      <div class="form-row two-col">
+        <div>
+          <label>Quantity</label>
+          <input type="number" id="add-qty" placeholder="10" step="any" min="0">
+        </div>
+        <div>
+          <label>Buy Price</label>
+          <input type="number" id="add-price" placeholder="500.00" step="any" min="0">
+        </div>
+      </div>
+      <div class="form-row">
+        <label>Entry Date</label>
+        <input type="date" id="add-date" onchange="previewOhlc('add')">
+      </div>
+      <div id="add-ohlc-preview" class="ohlc-preview"></div>
+      <div class="modal-actions">
+        <button class="btn" id="modal-add-submit" onclick="submitAdd()">Add Position</button>
+        <button class="btn ghost" onclick="closeModal('modal-add')">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Close Position Modal ─────────────────────────────────────────────────── -->
+<div id="modal-close" class="overlay" onclick="overlayClick(event,'modal-close')">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Close Position</h3>
+      <button class="close-btn" onclick="closeModal('modal-close')">&#10005;</button>
+    </div>
+    <div class="modal-body">
+      <div id="close-info" class="close-info"></div>
+      <div class="form-row two-col">
+        <div>
+          <label>Qty to Close</label>
+          <input type="number" id="close-qty" step="any" min="0">
+        </div>
+        <div>
+          <label>Close Price</label>
+          <input type="number" id="close-price" step="any" min="0">
+        </div>
+      </div>
+      <div class="form-row">
+        <label>Close Date</label>
+        <input type="date" id="close-date" onchange="previewOhlc('close')">
+      </div>
+      <div id="close-ohlc-preview" class="ohlc-preview"></div>
+      <div class="modal-actions">
+        <button class="btn" onclick="submitClose()">Close Position</button>
+        <button class="btn ghost" onclick="closeModal('modal-close')">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Settings Modal ───────────────────────────────────────────────────────── -->
+<div id="modal-settings" class="overlay" onclick="overlayClick(event,'modal-settings')">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Settings</h3>
+      <button class="close-btn" onclick="closeModal('modal-settings')">&#10005;</button>
+    </div>
+    <div class="modal-body">
+      <p class="settings-hint">Saved in your browser only. Repo: bhusalsandesh14/sandesh</p>
+      <div class="form-row">
+        <label>GitHub Token</label>
+        <input type="password" id="gh-token" placeholder="github_pat_..." autocomplete="off">
+      </div>
+      <div id="token-test-result" style="font-size:0.78rem;padding:6px 0"></div>
+      <div class="modal-actions">
+        <button class="btn" onclick="saveSettings()">Save</button>
+        <button class="btn secondary sm" onclick="testToken()">Test Token</button>
+        <button class="btn ghost" onclick="closeModal('modal-settings')">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Toast ────────────────────────────────────────────────────────────────── -->
+<div id="toast" class="toast"></div>
+
+<script src="github.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
