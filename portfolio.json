@@ -1,13 +1,4 @@
 {
-  "positions": [
-    {
-      "id": 1,
-      "symbol": "NABIL",
-      "qty": 20,
-      "buy_price": 6000,
-      "entry_date": "2026-04-05",
-      "entry_ohlc": null
-    }
-  ],
+  "positions": [],
   "history": []
 }
