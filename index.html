@@ -31,7 +31,7 @@
       <button class="active" onclick="showTab('portfolio',this,'mob-portfolio')">Portfolio</button>
       <button onclick="showTab('history',this,'mob-history')">History</button>
       <button onclick="showTab('analytics',this,'mob-analytics')">Analytics</button>
-      <button onclick="showTab('equilibrium',this,'mob-eq')">Equilibrium</button>
+      <button onclick="showTab('equilibrium',this,'mob-eq');loadEquilibrium()">Equilibrium</button>
     </nav>
     <div class="header-right">
       <span id="dirty-dot" class="dirty-dot hidden" title="Unsynced changes"></span>
@@ -134,7 +134,7 @@
         <button class="btn" onclick="loadEquilibrium()">Load Results</button>
       </div>
       <div id="eq-loading" class="loading-text hidden">Loading equilibrium data...</div>
-      <div id="eq-empty" class="muted-msg hidden">No equilibrium.json found. Run "Update Data" workflow first.</div>
+      <div id="eq-empty" class="muted-msg hidden">No equilibrium data available yet. Data updates daily at midnight UTC.</div>
       <div class="table-wrap desktop-only" id="eq-table-wrap" style="display:none">
         <table>
           <thead><tr>
@@ -160,7 +160,7 @@
       <button id="mob-analytics" onclick="showTab('analytics',this,'mob-analytics')">
         <span class="icon">&#128200;</span>Analytics
       </button>
-      <button id="mob-eq" onclick="showTab('equilibrium',this,'mob-eq')">
+      <button id="mob-eq" onclick="showTab('equilibrium',this,'mob-eq');loadEquilibrium()">
         <span class="icon">&#127919;</span>Scanner
       </button>
     </div>
