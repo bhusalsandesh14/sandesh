@@ -1,4 +1,44 @@
 {
-  "positions": [],
+  "positions": [
+    {
+      "id": 1,
+      "symbol": "BARUN",
+      "qty": 50,
+      "buy_price": 245,
+      "entry_date": "2026-04-05",
+      "entry_ohlc": {
+        "open": 346,
+        "high": 350,
+        "low": 332.9,
+        "close": 334
+      }
+    },
+    {
+      "id": 3,
+      "symbol": "USLB",
+      "qty": 67,
+      "buy_price": 1330,
+      "entry_date": "2026-04-05",
+      "entry_ohlc": {
+        "open": 1392,
+        "high": 1400,
+        "low": 1322,
+        "close": 1330
+      }
+    },
+    {
+      "id": 4,
+      "symbol": "SMHL",
+      "qty": 56,
+      "buy_price": 482,
+      "entry_date": "2026-04-05",
+      "entry_ohlc": {
+        "open": 501.1,
+        "high": 501.1,
+        "low": 478,
+        "close": 482
+      }
+    }
+  ],
   "history": []
 }
