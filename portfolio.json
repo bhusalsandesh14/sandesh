@@ -38,6 +38,19 @@
         "low": 478,
         "close": 482
       }
+    },
+    {
+      "id": 5,
+      "symbol": "PHCL",
+      "qty": 545,
+      "buy_price": 292,
+      "entry_date": "2026-04-05",
+      "entry_ohlc": {
+        "open": 306.1,
+        "high": 310,
+        "low": 290,
+        "close": 292
+      }
     }
   ],
   "history": []
